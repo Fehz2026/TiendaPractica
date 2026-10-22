@@ -23,10 +23,56 @@ namespace TiendaPractica
             // Detectar cuando se selecciona un producto.
             dgvProductos.CellClick += dgvProductos_CellClick;
 
-            // Cargar los datos al abrir el formulario.
-            CargarCategorias();
-            CargarProductos();
+            if (InicializarBaseDeDatos())
+            {
+                CargarCategorias();
+                CargarProductos();
+            }
+
+
         }
+
+
+        private bool InicializarBaseDeDatos()
+        {
+            try
+            {
+                using var db = new TiendaContext();
+
+                // Crear la base de datos y sus tablas
+                // si todavía no existen.
+                db.Database.EnsureCreated();
+
+                // Insertar categorías solo si la tabla está vacía.
+                if (!db.Categorias.Any())
+                {
+                    db.Categorias.AddRange(
+                        new Categoria { Nombre = "Alimentos" },
+                        new Categoria { Nombre = "Electrónica" },
+                        new Categoria { Nombre = "Hogar" },
+                        new Categoria { Nombre = "Ropa" },
+                        new Categoria { Nombre = "Papelería" }
+                    );
+
+                    db.SaveChanges();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "No se pudo inicializar la base de datos:\n"
+                    + ex.Message,
+                    "Error de conexión",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+
+                return false;
+            }
+        }
+
 
         // =========================================
         // CARGAR CATEGORÍAS
